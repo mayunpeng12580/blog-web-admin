@@ -1,4 +1,5 @@
 <template>
+<div id="login-wrap">
   <div id="login-view">
       <a-card
         style="width:100%"
@@ -17,18 +18,21 @@
         <register  v-show="key == 'register'"></register>
       </a-card>
   </div>
+  </div>
 </template>
 
 
 <script>
 import login from "./login"
 import register from "./register"
+import bgImg from "../../assets/下载.png"
 export default {
   components: {
     login,register
 },
   data() {
     return {
+      bgImg,
       tabList: [
         {
           key: "login",
@@ -52,6 +56,9 @@ export default {
       console.log(key, type);
       this[type] = key;
     }
+  },
+  created: {
+    
   }
 };
 </script>
@@ -59,10 +66,12 @@ export default {
 
 <style>
 
+
+
 #login-view {
     width: 400px;
     height: 100%;
-    margin: 200px auto;
+    margin: 250px auto;
 }
 
 #login-view .ant-card-head-title {

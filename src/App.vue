@@ -99,6 +99,12 @@ body,
   height: 100%;
   overflow: hidden;
 }
+
+#app {
+  background-image: url("assets/下载.png");
+  background-size: 100% 100%;
+
+}
 h1,
 h2,
 h3,
