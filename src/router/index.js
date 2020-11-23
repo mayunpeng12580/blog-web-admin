@@ -6,6 +6,7 @@ import LoginView from '@/view/Login/login'
 import RegisterView from '@/view/Login/register'
 import TitleNav from '@/view/TitleNav/index'
 import ContentView from '@/view/Content/index'
+import ContentFrom from '@/view/Content/from'
 
 Vue.use(Router)
 
@@ -51,6 +52,13 @@ export default new Router({
             mainView: ContentView
           }
         },
+        {
+          path: 'cafrom',
+          name: 'cafrom',
+          components: {
+            mainView: ContentFrom
+          }
+        }
       ]
     }
   ]
