@@ -3,17 +3,13 @@
     <a-layout-sider v-model="collapsed" :trigger="null" collapsible>
       <div class="logo" />
       <a-menu theme="dark" mode="inline" :default-selected-keys="['1']">
-        <a-menu-item key="1">
-          <a-icon type="user" />
-          <span>nav 1</span>
+        <a-menu-item key="1" @click="goPageHandle('/home/nav')">
+          <a-icon type="menu" />
+          <span>栏目管理</span>
         </a-menu-item>
-        <a-menu-item key="2">
-          <a-icon type="video-camera" />
-          <span>nav 2</span>
-        </a-menu-item>
-        <a-menu-item key="3">
-          <a-icon type="upload" />
-          <span>nav 3</span>
+        <a-menu-item key="2"  @click="goPageHandle('/home/content')">
+          <a-icon type="box-plot" />
+          <span>文章管理</span>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -24,10 +20,25 @@
           :type="collapsed ? 'menu-unfold' : 'menu-fold'"
           @click="() => (collapsed = !collapsed)"
         />
+        <div style="float:right; margin-right: 20px;">
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click="e => e.preventDefault()">
+              Hover me
+              <a-icon type="down" />
+            </a>
+            <a-menu slot="overlay">
+              <a-menu-item align="center">
+                <a @click="logOut">退 出</a>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+        </div>
       </a-layout-header>
       <a-layout-content
         :style="{ margin: '24px 16px', padding: '24px', background: '#fff', minHeight: '280px' }"
-      >Content</a-layout-content>
+      >
+      <router-view name="mainView"></router-view>
+      </a-layout-content>
     </a-layout>
   </a-layout>
 </template>
@@ -37,6 +48,28 @@ export default {
     return {
       collapsed: false
     };
+  },
+  methods: {
+    // silder
+    goPageHandle(key){
+      this.$router.push({path: key})
+    },
+    //退出功能
+    logOut() {
+      var _this = this;
+      this.$confirm({
+        title: "即将退出本系统，是否继续?",
+        // content: h => <div style="color:red;">是否要退出本系统</div>,
+        onOk() {
+          _this.$router.push({ path: "/login" });
+          _this.$message.info("您已成功退出本系统");
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+        class: "test"
+      });
+    }
   }
 };
 </script>

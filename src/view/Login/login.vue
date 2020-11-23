@@ -1,11 +1,11 @@
 <template>
   <div id="login-from">
     <a-form-model ref="ruleForm" :model="ruleForm" :rules="rules" v-bind="layout">
-        <a-form-model-item has-feedback label="用户名：" prop="pass" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-          <a-input v-model="ruleForm.pass" type="password" autocomplete="off" placeholder="请输入用户名" />
+        <a-form-model-item has-feedback label="用户名：" prop="username" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+          <a-input v-model="ruleForm.username" type="text" autocomplete="off" placeholder="请输入用户名" />
         </a-form-model-item>
-      <a-form-model-item has-feedback label="密码：" prop="checkPass"  :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-        <a-input-password v-model="ruleForm.checkPass" type="password" placeholder="请输入密码" />
+      <a-form-model-item has-feedback label="密码：" prop="password"  :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-input-password v-model="ruleForm.password" type="password" placeholder="请输入密码" />
       </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 20, offset: 2 }">
         <a-button type="primary" @click="submitForm('ruleForm')" block size="default">登录</a-button>
@@ -15,29 +15,30 @@
 </template>
 
 <script>
+import md5 from 'js-md5';
 export default {
+  name:'login',
   data() {
-    let checkPending;
-    let checkAge = (rule, value, callback) => {
-      clearTimeout(checkPending);
-      if (!value) {
-        return callback(new Error("Please input the age"));
+
+    //检验用户名
+    let validateUsername = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("用户名不能为空"));
+      } else if (value.length < 2 || value.length > 6) {
+        callback(new Error("用户名长度为2-6位"));
+      } else {
+        // if (this.ruleForm.checkPass !== "") {
+        //   this.$refs.ruleForm.validateField("checkPass");
+        // }
+        callback();
       }
-      checkPending = setTimeout(() => {
-        if (!Number.isInteger(value)) {
-          callback(new Error("Please input digits"));
-        } else {
-          if (value < 18) {
-            callback(new Error("Age must be greater than 18"));
-          } else {
-            callback();
-          }
-        }
-      }, 1000);
     };
+    //检查密码
     let validatePass = (rule, value, callback) => {
       if (value === "") {
-        callback(new Error("Please input the password"));
+        callback(new Error("密码不能为空"));
+      } else if (value.length < 2 || value.length > 18) {
+        callback(new Error("密码长度为2-18位"));
       } else {
         if (this.ruleForm.checkPass !== "") {
           this.$refs.ruleForm.validateField("checkPass");
@@ -45,25 +46,15 @@ export default {
         callback();
       }
     };
-    let validatePass2 = (rule, value, callback) => {
-      if (value === "") {
-        callback(new Error("Please input the password again"));
-      } else if (value !== this.ruleForm.pass) {
-        callback(new Error("Two inputs don't match!"));
-      } else {
-        callback();
-      }
-    };
+    
     return {
       ruleForm: {
-        pass: "",
-        checkPass: "",
-        age: ""
+        username: "",
+        password: "",
       },
       rules: {
-        pass: [{ validator: validatePass, trigger: "change" }],
-        checkPass: [{ validator: validatePass2, trigger: "change" }],
-        age: [{ validator: checkAge, trigger: "change" }]
+        username: [{ validator: validateUsername, trigger: "change" }],
+        password: [{ validator: validatePass, trigger: "change" }],
       },
       layout: {
         labelCol: { span: 4 },
@@ -73,16 +64,38 @@ export default {
   },
   methods: {
     submitForm(formName) {
+      
       this.$refs[formName].validate(valid => {
         if (valid) {
-          alert("submit!");
+          let data = this.ruleForm
+          data.password = md5(data.password)
+          this.$axios({
+            url: "http://127.0.0.1:9000/api/login",
+            method: "post",
+            data: data
+          })
+            .then(res => {
+              console.log(res);
+              let { code, msg } = res.data;
+              if (code == 200) {
+                this.$message.success(msg);
+                this.$router.push({ path: '/home' })
+              } else {
+                this.$message.error(msg);
+              }
+            })
+            .catch(err => {
+              this.$message.error(err);
+            });
+
+
+
         } else {
           console.log("error submit!!");
           return false;
         }
       });
 
-        this.$router.push({ path: '/' })
     }
   }
 };

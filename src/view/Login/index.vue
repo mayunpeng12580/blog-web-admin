@@ -1,6 +1,6 @@
 <template>
-<div id="login-wrap">
-  <div id="login-view">
+  <div id="login-wrap">
+    <div id="login-view">
       <a-card
         style="width:100%"
         title="博客后台管理系统"
@@ -13,30 +13,34 @@
           {{ item.key }}
         </span>
         <!-- <a slot="extra" href="#">More</a> -->
+
         {{ contentList[key] }}
-        <login v-show="key == 'login'"></login>
-        <register  v-show="key == 'register'"></register>
+        <router-view name="bottom"></router-view>
+        <!-- <login v-show="key == 'login'"></login>
+        <register  v-show="key == 'register'"></register>-->
       </a-card>
-  </div>
+    </div>
   </div>
 </template>
 
 
 <script>
-import login from "./login"
-import register from "./register"
-import bgImg from "../../assets/下载.png"
+import login from "./login";
+import register from "./register";
+import bgImg from "../../assets/下载.png";
 export default {
+  name: "index",
   components: {
-    login,register
-},
+    login,
+    register
+  },
   data() {
     return {
       bgImg,
       tabList: [
         {
           key: "login",
-          tab: '登录',
+          tab: "登录",
           scopedSlots: { tab: "customRender" }
         },
         {
@@ -45,33 +49,38 @@ export default {
         }
       ],
       contentList: {
-        login: '',
-        register: ''
+        login: "",
+        register: ""
       },
-      key: "login",
+      key: "login"
     };
   },
   methods: {
     onTabChange(key, type) {
       console.log(key, type);
       this[type] = key;
+      this.$router.push({ path: "/" + key });
     }
   },
-  created: {
-    
-  }
+  watch: {
+    $route(to, from) {
+      if (to.path == "/login") {
+        this.key = "login";
+      } else {
+        this.key = "register";
+      }
+    }
+  },
+  created: {}
 };
 </script>
 
 
 <style>
-
-
-
 #login-view {
-    width: 400px;
-    height: 100%;
-    margin: 250px auto;
+  width: 400px;
+  height: 100%;
+  margin: 250px auto;
 }
 
 #login-view .ant-card-head-title {
@@ -80,11 +89,12 @@ export default {
   font-weight: 600;
 }
 
-#login-view .ant-card-head, #login-view  .ant-card-head .ant-tabs-bar {
-    border-bottom: 0px ;
+#login-view .ant-card-head,
+#login-view .ant-card-head .ant-tabs-bar {
+  border-bottom: 0px;
 }
 
 #login-view .ant-card-head .ant-tabs-nav-container {
-    text-align: center;
+  text-align: center;
 }
 </style>
