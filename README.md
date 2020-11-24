@@ -1,6 +1,6 @@
 # blog-web
 
-> A Vue.js project
+> 博客后台管理系统
 
 ## Build Setup
 
