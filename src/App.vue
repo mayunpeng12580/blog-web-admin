@@ -97,13 +97,16 @@ body,
 #app {
   width: 100%;
   height: 100%;
+  cursor: url('assets/mouse.png'),auto;
   overflow: hidden;
 }
 
 #app {
-  background-image: url("assets/下载.png");
-  background-size: 100% 100%;
-
+  /* background-image: url("assets/bg.gif"); */
+  background-color: black;
+  background-size: 850px;
+  background-repeat: no-repeat;
+  background-position: 15% center;
 }
 h1,
 h2,

@@ -3,6 +3,11 @@
     <a-button class="editable-add-btn" @click="handleAdd">Add</a-button>
     <a-table bordered :data-source="dataSource" :columns="columns" :loading="isloading">
         <span
+          slot="status"
+          slot-scope="status"
+        >{{ status == 1 ? "显示" : "隐藏"}}
+        </span>
+        <span
           slot="updatetime"
           slot-scope="updatetime"
         >{{ updatetime|date('YYYY-MM-DD HH:mm:ss') }}
@@ -72,8 +77,21 @@ export default {
           //   scopedSlots: { customRender: 'name' },
         },
         {
+          title: "文章标题",
+          dataIndex: "title"
+        },
+        {
           title: "分类名称",
-          dataIndex: "name"
+          dataIndex: "cate_name"
+        },
+        {
+          title: "排序",
+          dataIndex: "o"
+        },
+        {
+          title: "状态",
+          dataIndex: "status",
+          scopedSlots: { customRender: "status" }
         },
         {
           title: "修改时间",
@@ -175,7 +193,7 @@ export default {
     onDelete(key) {
       console.log(key);
       this.$axios({
-        url: "http://127.0.0.1:9000/api/category/deleteCategory/" + key,
+        url: "http://127.0.0.1:9000/api/article/deleteArticle/" + key,
         method: "get"
       })
         .then(res => {
@@ -183,7 +201,7 @@ export default {
           let { code, msg } = res.data;
           if (code == 200) {
             this.$message.success(msg);
-            this.getCategorylistHandle();
+            this.getArticlelistHandle();
           } else {
             this.$message.error(msg);
           }
@@ -199,15 +217,12 @@ export default {
       this.$router.push({path: '/home/cafrom'})
     },
     handleEdit(data) {
-      this.currId = data.id;
-      this.ruleForm.name = data.name;
-      this.modalTitle = "修改分类";
-      this.visible = true;
+      this.$router.push({path: '/home/cafrom?id=' + data.id})
     },
-    // 获取分类列表的方法
-    getCategorylistHandle() {
+    // 获取文章列表的方法
+    getArticlelistHandle() {
       this.$axios({
-        url: "http://127.0.0.1:9000/api/category/getCategorylist",
+        url: "http://127.0.0.1:9000/api/article/getArticleList",
         method: "get"
       })
         .then(res => {
@@ -216,7 +231,7 @@ export default {
           if (code == 200) {
             this.dataSource = data;
             this.isloading = false;
-            this.$message.success(msg);
+            // this.$message.success(msg);
           } else {
             this.$message.error(msg);
           }
@@ -227,7 +242,7 @@ export default {
     }
   },
   created() {
-    this.getCategorylistHandle();
+    this.getArticlelistHandle();
   }
 };
 </script>

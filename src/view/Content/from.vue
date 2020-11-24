@@ -55,6 +55,8 @@
       </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" @click="onSubmit">提交</a-button>
+        
+        <a-button type="danger" @click="goBack" style="margin-left: 10px;">返回</a-button>
       </a-form-model-item>
     </a-form-model>
   </div>
@@ -73,7 +75,7 @@ export default {
         sort: "",
         region: undefined,
         resource: "1",
-        desc: "发送到房贷是否松动"
+        desc: ""
       },
       rules: {
         name: [
@@ -84,7 +86,7 @@ export default {
           },
           {
             min: 3,
-            max: 5,
+            max: 50,
             message: "文章标题为3-50个字符",
             trigger: "blur"
           }
@@ -161,32 +163,35 @@ export default {
     };
   },
   methods: {
+    //返回上一级
+    goBack(){
+      this.$router.go(-1)
+    },
     //   上传图片方法
     handleEditorImgAdd(pos, $file) {
-      
       let formdata = new FormData();
       formdata.append("file", $file);
-      this.imgFile[(pos-0)] = $file;
-    //   let instance = this.$axios.create({
-    //     withCredentials: true,
-    //     headers: {
-    //     //   Authorization: token // 我上传的时候请求头需要带上token 验证，不需要的删除就好
-    //     }
-    //   });
+      this.imgFile[pos - 0] = $file;
+      //   let instance = this.$axios.create({
+      //     withCredentials: true,
+      //     headers: {
+      //     //   Authorization: token // 我上传的时候请求头需要带上token 验证，不需要的删除就好
+      //     }
+      //   });
       this.$axios({
         url: "http://127.0.0.1:9000/api/uploadImage",
         method: "post",
         data: formdata
       }).then(res => {
-          console.log(res)
+        console.log(res);
         if (res.data.code === 200) {
-          this.$Message.success("上传成功");
+          this.$message.success("上传成功");
           let url = res.data.data;
           let name = $file.name;
           if (name.includes("-")) {
             name = name.replace(/-/g, "");
           }
-          let content = this.form.content;
+          let content = this.form.desc;
           // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)  这里是必须要有的
           if (content.includes(name)) {
             let oStr = `(${pos})`;
@@ -196,28 +201,94 @@ export default {
             let insertStr = (soure, start, newStr) => {
               return soure.slice(0, start) + newStr + soure.slice(start);
             };
-            this.form.content = insertStr(str, index, nStr);
+            this.form.desc = insertStr(str, index, nStr);
           }
         } else {
-          this.$Message.error(res.data.msg);
+          this.$message.error(res.data.msg);
         }
       });
     },
     // 删除图片方法
     handleEditorImgDel(pos) {
-        console.log(pos)
+      console.log(pos);
       delete this.imgFile[pos];
     },
     //提交表单
     onSubmit() {
-      this.$refs.ruleForm.validate(valid => {
-        if (valid) {
-          console.log(this.form);
-        } else {
-          console.log("error submit!!");
-          return false;
-        }
-      });
+      if (this.$route.query.id) {
+        this.$refs.ruleForm.validate(valid => {
+          if (valid) {
+            var region_name = "";
+            this.regionList.forEach((item, index) => {
+              if (item.id == this.form.region) {
+                region_name = item.name;
+              }
+            });
+            let tmp = this.form;
+            tmp.region_name = region_name;
+            tmp.id = this.$route.query.id;
+            console.log(tmp);
+            this.$axios({
+              url: "http://127.0.0.1:9000/api/article/editArticle",
+              method: "post",
+              data: tmp
+            })
+              .then(res => {
+                console.log(res);
+                let { code, data, msg } = res.data;
+                if (code == 200) {
+                  this.regionList = data;
+                  this.$message.success(msg);
+                  this.$router.push({ path: "/home/content" });
+                } else {
+                  this.$message.error(msg);
+                }
+              })
+              .catch(err => {
+                this.$message.error(err);
+              });
+          } else {
+            console.log("error submit!!");
+            return false;
+          }
+        });
+      } else {
+        this.$refs.ruleForm.validate(valid => {
+          if (valid) {
+            var region_name = "";
+            this.regionList.forEach((item, index) => {
+              if (item.id == this.form.region) {
+                region_name = item.name;
+              }
+            });
+            let tmp = this.form;
+            tmp.region_name = region_name;
+            console.log(tmp);
+            this.$axios({
+              url: "http://127.0.0.1:9000/api/article/addArticle",
+              method: "post",
+              data: tmp
+            })
+              .then(res => {
+                console.log(res);
+                let { code, data, msg } = res.data;
+                if (code == 200) {
+                  this.regionList = data;
+                  this.$message.success(msg);
+                  this.$router.push({ path: "/home/content" });
+                } else {
+                  this.$message.error(msg);
+                }
+              })
+              .catch(err => {
+                this.$message.error(err);
+              });
+          } else {
+            console.log("error submit!!");
+            return false;
+          }
+        });
+      }
     },
     resetForm() {
       this.$refs.ruleForm.resetFields();
@@ -240,10 +311,37 @@ export default {
         .catch(err => {
           this.$message.error(err);
         });
+    },
+    getArticledescHandle(id) {
+      this.$axios({
+        url: "http://127.0.0.1:9000/api/article/getArticle/" + id,
+        method: "get"
+      })
+        .then(res => {
+          let { code, data } = res.data;
+
+          if (code == 200) {
+            this.form["name"] = data[0].title;
+            this.form["desc"] = data[0].content;
+            this.form["sort"] = data[0].o;
+            this.form["resource"] = data[0].status;
+            this.form["region"] = data[0].cate_id;
+            console.log(this.regionList);
+          } else {
+            this.$message.error(msg);
+          }
+        })
+        .catch(err => {
+          this.$message.error(err);
+        });
     }
   },
   created() {
     this.getCategorylistHandle();
+    console.log(this.$route.query.id);
+    if (this.$route.query.id) {
+      this.getArticledescHandle(this.$route.query.id);
+    }
   }
 };
 </script>

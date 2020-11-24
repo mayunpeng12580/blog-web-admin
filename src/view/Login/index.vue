@@ -27,7 +27,7 @@
 <script>
 import login from "./login";
 import register from "./register";
-import bgImg from "../../assets/下载.png";
+// import bgImg from "../../assets/bg.jpg";
 export default {
   name: "index",
   components: {
@@ -36,7 +36,7 @@ export default {
   },
   data() {
     return {
-      bgImg,
+      // bgImg,
       tabList: [
         {
           key: "login",
@@ -80,7 +80,10 @@ export default {
 #login-view {
   width: 400px;
   height: 100%;
-  margin: 250px auto;
+  margin: 300px auto;
+  box-shadow:0px 0px 10px 3px #00CCFB,
+           0px 0px 10px 6px #999999,
+           0px 0px 10px 9px #333333;
 }
 
 #login-view .ant-card-head-title {
