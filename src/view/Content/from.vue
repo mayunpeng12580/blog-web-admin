@@ -351,4 +351,7 @@ export default {
   border: 1px solid #d9d9d9 !important;
   box-shadow: none !important;
 }
+.ant-select-dropdown {
+  z-index: 999999;
+}
 </style>
